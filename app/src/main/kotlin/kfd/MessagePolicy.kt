@@ -1,6 +1,6 @@
 package kfd
 
 fun canSendMessage(
-    text: String?,
+    text: String? = "",
     maxLength: Int = 140
-): Boolean = text!!.isNotEmpty() && text.length < maxLength
+): Boolean =  !text.isNullOrBlank() && text.length < maxLength
