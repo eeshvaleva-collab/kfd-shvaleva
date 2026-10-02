@@ -10,6 +10,11 @@ class MessagePolicyTest {
     }
 
     @Test
+    fun acceptsLimitMessage() {
+        assertTrue(canSendMessage("Привет", 6))
+    }
+
+    @Test
     fun declineEmptyMessage() {
         assertFalse(canSendMessage(""))
     }
