@@ -1,4 +1,5 @@
-package kfd
+package stat
+
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -24,7 +25,7 @@ internal fun run(args: Array<String>): Int{
 
 internal fun formatReport(report: Report): String = buildString {
     if (report.sortedFiles.isNotEmpty()) {
-        appendLine("Files by extension:")
+        appendLine("Files sorted by extension:")
         for ((extension, fileCount, lineCount) in report.sortedFiles) {
             appendLine(
                 "$extension: $fileCount file${if (fileCount != 1) "s" else ""}, " +

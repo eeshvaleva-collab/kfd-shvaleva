@@ -8,7 +8,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("CliKt")
+    mainClass.set("stat.CliKt")
 }
 
 dependencies {

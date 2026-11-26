@@ -1,4 +1,4 @@
-package kfd
+package stat
 import java.io.File
 import java.nio.file.Files
 
@@ -26,21 +26,22 @@ data class Report(
     val longestFiles: List<FileStats>
 )
 
-private fun formStats(path: File): Sequence<FileInfo> {
+private fun formStats(path: File): List<FileInfo> {
     require(path.isDirectory){ "Error: $path is not a directory or doesn't exist"}
     val allFiles = path.walkTopDown()
         .onEnter { dir -> dir.name !in IGNORED && !Files.isSymbolicLink(dir.toPath())}
-        .filter {file -> file.isFile && file.extension in ALLOWED && !Files.isSymbolicLink(file.toPath())}
+        .filter {file -> file.isFile && file.extension.lowercase() in ALLOWED && !Files.isSymbolicLink(file.toPath())}
     return allFiles.map { file ->
         val lineCount = file.useLines { it.count() }
         val relativePath = file.relativeTo(path).invariantSeparatorsPath
-        val extension = file.extension
+        val extension = file.extension.lowercase()
         FileInfo(relativePath, lineCount, extension)
     }
+        .toList()
 }
 
 fun analyzePath(path: File): Report {
-    val stats = formStats(path).toList()
+    val stats = formStats(path)
     return Report(
         sortByExt(stats),
         sortBySize(stats))
@@ -57,5 +58,4 @@ private fun sortBySize(stats: List<FileInfo>): List<FileStats> {
     return stats.sortedWith (compareByDescending<FileInfo> { it.lineCount }.thenBy { it.relativePath })
         .take(LIMIT)
         .map { FileStats(it.relativePath, it.lineCount) }
-        .toList()
 }

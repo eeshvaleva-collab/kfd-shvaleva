@@ -1,8 +1,8 @@
-package kfd
+package stat
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.api.BeforeEach
@@ -53,5 +53,17 @@ class StatsTest {
         assertTrue(report.sortedFiles.isEmpty())
         assertTrue(report.longestFiles.isEmpty())
     }
+
+    @Test
+    fun `throws exception when directory does not exist`() {
+        val invalidPath = File("non_existent_dir_12345")
+
+        val exception = assertThrows<IllegalArgumentException> {
+            analyzePath(invalidPath)
+        }
+        assertEquals("Error: $invalidPath is not a directory or doesn't exist", exception.message)
+
+    }
+
 
 }
