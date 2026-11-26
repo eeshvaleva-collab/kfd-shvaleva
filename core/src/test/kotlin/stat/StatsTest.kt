@@ -2,68 +2,65 @@ package stat
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
-import org.junit.jupiter.api.BeforeEach
 import java.io.File
-import java.nio.file.Path
 
 class StatsTest {
 
-    @TempDir
-    lateinit var testDir: File
-
-    @BeforeEach
-    fun setUp() {
-        val srcDir = File(testDir, "src").apply { mkdirs() }
-        File(srcDir, "A.kt").writeText("package sample\nclass A")
-        File(srcDir, "B.kt").writeText("package sample\nclass B\n")
-        File(testDir, "README.md").writeText("")
-        File(testDir, "notes.txt").writeText("ignored")
-    }
+    private fun File.createFile(relativePath: String, content: String = ""): File =
+        resolve(relativePath).apply {
+            parentFile?.mkdirs()
+            writeText(content)
+        }
 
     @Test
-    fun `first report counts files and lines by extension`() {
-        val report = analyzePath(testDir)
+    fun `counts files and lines by extension`(@TempDir dir: File) {
+        dir.createFile("src/A.kt", "package sample\nclass A")
+        dir.createFile("src/B.kt", "package sample\nclass B\n")
+        dir.createFile("README.md")
+        dir.createFile("notes.txt", "ignored")
+        val report = analyzePath(dir)
 
         val expected = listOf(
-            ExtensionStats(extension = "kt", fileCount = 2, lineCount = 4),
-            ExtensionStats(extension = "md", fileCount = 1, lineCount = 0)
+            ExtensionStats("kt", 2, 4),
+            ExtensionStats("md", 1, 0)
         )
         assertEquals(expected, report.sortedFiles)
     }
 
     @Test
-    fun `second report sorts longest files by lines desc and path asc`() {
-        val report = analyzePath(testDir)
+    fun `sorts longest files by lines desc and path asc`(@TempDir dir: File) {
+        dir.createFile("src/A.kt", "package sample\nclass A")
+        dir.createFile("src/B.kt", "package sample\nclass B\n")
+        dir.createFile("README.md")
+        dir.createFile("notes.txt", "ignored")
+        val report = analyzePath(dir)
 
         val expected = listOf(
-            FileStats(relativePath = "src/A.kt", lineCount = 2),
-            FileStats(relativePath = "src/B.kt", lineCount = 2),
-            FileStats(relativePath = "README.md", lineCount = 0)
+            FileStats("src/A.kt", 2),
+            FileStats("src/B.kt", 2),
+            FileStats("README.md", 0)
         )
         assertEquals(expected, report.longestFiles)
     }
 
     @Test
-    fun `empty directory returns empty reports`(@TempDir emptyDir: Path) {
-        val report = analyzePath(emptyDir.toFile())
+    fun `returns empty report for empty directory`(@TempDir dir: File) {
+        val report = analyzePath(dir)
 
         assertTrue(report.sortedFiles.isEmpty())
         assertTrue(report.longestFiles.isEmpty())
     }
 
     @Test
-    fun `throws exception when directory does not exist`() {
-        val invalidPath = File("non_existent_dir_12345")
+    fun `fails when directory does not exist`(@TempDir dir: File) {
+        val missing = dir.resolve("missing")
 
-        val exception = assertThrows<IllegalArgumentException> {
-            analyzePath(invalidPath)
+        val ex = assertThrows<IllegalArgumentException> {
+            analyzePath(missing)
         }
-        assertEquals("Error: $invalidPath is not a directory or doesn't exist", exception.message)
-
+        assertEquals("Error: $missing is not a directory or doesn't exist", ex.message)
     }
-
-
 }

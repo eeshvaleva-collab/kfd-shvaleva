@@ -3,11 +3,11 @@ package stat
 import java.io.File
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>){
+fun main(args: Array<String>) {
     exitProcess(run(args))
 }
 
-internal fun run(args: Array<String>): Int{
+internal fun run(args: Array<String>): Int {
     if (args.size != 1) {
         System.err.println("Error: expected exactly 1 argument (directory path), got ${args.size}")
         return 1
@@ -35,7 +35,7 @@ internal fun formatReport(report: Report): String = buildString {
     }
     if (report.longestFiles.isNotEmpty()) {
         if (isNotEmpty()) appendLine()
-        appendLine("Top 3 longest files:")
+        appendLine("Top $LIMIT longest files:")
         for ((path, count) in report.longestFiles) {
             appendLine("$path ($count)")
         }
