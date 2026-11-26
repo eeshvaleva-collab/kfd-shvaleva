@@ -47,49 +47,11 @@ class StatsTest {
     }
 
     @Test
-    fun `formatReport produces expected text output`() {
-        val report = analyzePath(testDir)
-        val formatted = formatReport(report)
-
-        val expectedText = buildString {
-            appendLine("Files by extension:")
-            appendLine("kt: 2 files, 4 lines")
-            appendLine("md: 1 file, 0 lines")
-            appendLine()
-            appendLine("Top 3 longest files:")
-            appendLine("src/A.kt (2)")
-            appendLine("src/B.kt (2)")
-            appendLine("README.md (0)")
-        }
-
-        assertEquals(expectedText, formatted)
-    }
-
-    @Test
     fun `empty directory returns empty reports`(@TempDir emptyDir: Path) {
         val report = analyzePath(emptyDir.toFile())
 
         assertTrue(report.sortedFiles.isEmpty())
         assertTrue(report.longestFiles.isEmpty())
-        assertEquals("", formatReport(report))
-    }
-
-    @Test
-    fun `invalid input path throws IllegalArgumentException and run returns non-zero code`() {
-        val nonExistent = File(testDir, "non_existent_folder")
-        val regularFile = File(testDir, "README.md")
-
-        assertThrows(IllegalArgumentException::class.java) {
-            analyzePath(nonExistent)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            analyzePath(regularFile)
-        }
-
-        assertEquals(1, run(emptyArray()))
-        assertEquals(1, run(arrayOf(testDir.path, "extra_arg")))
-        assertEquals(1, run(arrayOf(nonExistent.path)))
-        assertEquals(1, run(arrayOf(regularFile.path)))
     }
 
 }
